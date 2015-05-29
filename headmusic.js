@@ -1,9 +1,9 @@
 var audioCtx = new window.AudioContext();
 
-var oscilattor = audioCtx.createOscillator();
+var oscillator = audioCtx.createOscillator();
 var gainNode = audioCtx.createGain();
 
-oscilattor.connect(gainNode);
+oscillator.connect(gainNode);
 gainNode.connect(audioCtx.destination);
 
 var windowWIDTH = window.innerWidth;
@@ -15,19 +15,29 @@ var maxVol = 0.02;
 var initialFreq = 3000;
 var initialVol = 0.01;
 
-oscilattor.type = "square";
-oscilattor.frequency.value = initialFreq;
-oscilattor.detune.value = 100;
-oscilattor.start(0);
+oscillator.type = "square";
+oscillator.frequency.value = initialFreq;
+oscillator.detune.value = 100;
+oscillator.start(0);
 
-oscilattor.onended = function(){
+function changeFreq(str, num) {
+			if (str === "plus") {
+				oscillator.frequency.value += num;
+			}
+			else if (str === "minus") {
+				oscillator.frequency.value -= num;
+			}
+		}
+
+
+oscillator.onended = function(){
 	console.log("stopped playing");
 };
 
 gainNode.gain.value = initialVol;
 
 
-/*oscilattor.frequency.value = initialFreq;*/
+/*oscillator.frequency.value = initialFreq;*/
 
 /*document.addEventListener('headtrackrStatus', 
   function (event) {
@@ -45,14 +55,29 @@ var htracker = new headtrackr.Tracker();
 htracker.init(videoInput, canvasInput);
 htracker.start();
 
+var startX = 100;
+
 /*htracker.addEventListener("found", function(event){
 	alert('it works');
 });*/
 
-headTracker.addEventListener("found", function(event){
+/*htracker.addEventListener("found", function(event){
         object.rotationZ(event.angle)
-            .positionX(event.x).positionY(event.y)
-            .scaleX(event.width).scaleY(event.height);
-    });
+        .positionX(event.x).positionY(event.y)
+        .scaleX(event.width).scaleY(event.height);
+    });*/
 
 
+  document.addEventListener("facetrackingEvent", function( event ) {
+                // once we have stable tracking, draw rectangle
+                if (event.detection == "CS") {
+                	if(startX < event.x) {
+                		changeFreq('minus', 10);
+                	}
+                	else if (startX > event.x ) {
+                		changeFreq('plus', 10);
+                	}
+                    startX = event.x;
+
+                }
+            });
